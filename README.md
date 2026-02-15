@@ -1,2 +1,0 @@
-# Script.e
-Xd
