@@ -1,0 +1,187 @@
+-- Services
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
+local LocalPlayer = Players.LocalPlayer
+
+-- Link direto do GitHub (versão sem premium)
+local SCRIPT_URL = "https://raw.githubusercontent.com/Dan41/Roblox-Scripts/refs/heads/main/Youtube%20Music%20Player/YoutubeMusicPlayer.lua"
+
+-- Criando a Interface para a Intro
+local oiTubeHubGui = Instance.new("ScreenGui")
+oiTubeHubGui.Name = "oiTubeHubIntro"
+
+local success, _ = pcall(function()
+    oiTubeHubGui.Parent = CoreGui
+end)
+if not success then
+    oiTubeHubGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+end
+
+oiTubeHubGui.ResetOnSpawn = false
+oiTubeHubGui.IgnoreGuiInset = true
+
+-- Tela de Fundo Escura
+local IntroFrame = Instance.new("Frame")
+IntroFrame.Size = UDim2.new(1, 0, 1, 0)
+IntroFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+IntroFrame.BorderSizePixel = 0
+IntroFrame.Parent = oiTubeHubGui
+
+-- Container Centralizado
+local ContentContainer = Instance.new("Frame")
+ContentContainer.Size = UDim2.new(0, 300, 0, 350)
+ContentContainer.Position = UDim2.new(0.5, -150, 0.5, -175)
+ContentContainer.BackgroundTransparency = 1
+ContentContainer.Parent = IntroFrame
+
+-- Círculo Amarelo (Estilo oiTube)
+local IconBackground = Instance.new("Frame")
+IconBackground.Size = UDim2.new(0, 160, 0, 160)
+IconBackground.Position = UDim2.new(0.5, -80, 0.05, 0)
+IconBackground.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+IconBackground.BorderSizePixel = 0
+IconBackground.Parent = ContentContainer
+
+local CornerBg = Instance.new("UICorner")
+CornerBg.CornerRadius = UDim.new(1, 0)
+CornerBg.Parent = IconBackground
+
+-- Ícone de Reprodução (Play)
+local PlayIcon = Instance.new("TextLabel")
+PlayIcon.Size = UDim2.new(1, 0, 1, 0)
+PlayIcon.BackgroundTransparency = 1
+PlayIcon.Text = "▶"
+PlayIcon.TextColor3 = Color3.fromRGB(15, 15, 15)
+PlayIcon.TextSize = 80
+PlayIcon.Font = Enum.Font.GothamBold
+PlayIcon.Parent = IconBackground
+
+-- Texto "OITUBE"
+local OiTubeText = Instance.new("TextLabel")
+OiTubeText.Size = UDim2.new(1, 0, 0, 40)
+OiTubeText.Position = UDim2.new(0, 0, 0.55, 0)
+OiTubeText.Text = "OITUBE"
+OiTubeText.TextColor3 = Color3.fromRGB(255, 255, 255)
+OiTubeText.TextSize = 30
+OiTubeText.Font = Enum.Font.GothamBold
+OiTubeText.BackgroundTransparency = 1
+OiTubeText.Parent = ContentContainer
+
+-- Status: Dados carregados com sucesso!
+local StatusText = Instance.new("TextLabel")
+StatusText.Size = UDim2.new(1, 0, 0, 25)
+StatusText.Position = UDim2.new(0, 0, 0.67, 0)
+StatusText.Text = "Dados carregados com sucesso!"
+StatusText.TextColor3 = Color3.fromRGB(0, 255, 127) -- Verde de sucesso
+StatusText.TextSize = 13
+StatusText.Font = Enum.Font.SourceSansBold
+StatusText.BackgroundTransparency = 1
+StatusText.Parent = ContentContainer
+
+-- BARRA DE CARREGAMENTO (Background)
+local BarBackground = Instance.new("Frame")
+BarBackground.Size = UDim2.new(0.8, 0, 0, 8)
+BarBackground.Position = UDim2.new(0.1, 0, 0.78, 0)
+BarBackground.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+BarBackground.BorderSizePixel = 0
+BarBackground.Parent = ContentContainer
+
+local BarBgCorner = Instance.new("UICorner")
+BarBgCorner.CornerRadius = UDim.new(0, 4)
+BarBgCorner.Parent = BarBackground
+
+-- Preenchimento da Barra
+local BarFill = Instance.new("Frame")
+BarFill.Size = UDim2.new(0, 0, 1, 0)
+BarFill.BackgroundColor3 = Color3.fromRGB(255, 215, 0) -- Amarelo oiTube
+BarFill.BorderSizePixel = 0
+BarFill.Parent = BarBackground
+
+local BarFillCorner = Instance.new("UICorner")
+BarFillCorner.CornerRadius = UDim.new(0, 4)
+BarFillCorner.Parent = BarFill
+
+-- BOTÃO DE PULAR (SKIP) COM O TEXTO "skip»"
+local SkipButton = Instance.new("TextButton")
+SkipButton.Size = UDim2.new(0, 75, 0, 28)
+SkipButton.Position = UDim2.new(1, -90, 0, 15)
+SkipButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+SkipButton.Text = "skip»"
+SkipButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+SkipButton.TextSize = 14
+SkipButton.Font = Enum.Font.GothamBold
+SkipButton.Parent = IntroFrame
+
+local SkipCorner = Instance.new("UICorner")
+SkipCorner.CornerRadius = UDim.new(0, 6)
+SkipCorner.Parent = SkipButton
+
+-- Animação da Barra de Carregamento (3 segundos)
+local tweenInfo = TweenInfo.new(3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+local tweenBar = TweenService:Create(BarFill, tweenInfo, {Size = UDim2.new(1, 0, 1, 0)})
+tweenBar:Play()
+
+-- Função centralizada para carregar o script principal
+local isLoaded = false
+local function LoadMainScript()
+    if isLoaded then return end
+    isLoaded = true
+    
+    -- Se clicar em skip, enche a barra na hora
+    BarFill.Size = UDim2.new(1, 0, 1, 0)
+    task.wait(0.2)
+    
+    oiTubeHubGui:Destroy()
+    
+    -- Baixa e executa o script modificado para amarelo e sem premium
+    local success, scriptContent = pcall(function()
+        return game:HttpGet(SCRIPT_URL)
+    end)
+    
+    if success and scriptContent then
+        -- Remove checagens de premium se houver no código original substituindo strings
+        scriptContent = scriptContent:gsub("isPremium", "true")
+        scriptContent = scriptContent:gsub("Premium", "true")
+        
+        local runSuccess, runErr = pcall(function()
+            loadstring(scriptContent)()
+        end)
+        
+        if runSuccess then
+            -- Varre a UI gerada para trocar vermelho por amarelo
+            task.spawn(function()
+                task.wait(0.4)
+                local playerGui = LocalPlayer:FindFirstChild("PlayerGui") or CoreGui
+                for _, obj in ipairs(playerGui:GetDescendants()) do
+                    if obj:IsA("GuiObject") then
+                        local col = obj.BackgroundColor3
+                        if col.R > 0.8 and col.G < 0.2 and col.B < 0.2 then
+                            obj.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+                        end
+                        if obj:IsA("TextButton") or obj:IsA("TextLabel") then
+                            local tcol = obj.TextColor3
+                            if tcol.R > 0.8 and tcol.G < 0.2 and tcol.B < 0.2 then
+                                obj.TextColor3 = Color3.fromRGB(255, 215, 0)
+                            end
+                        end
+                    end
+                end
+            end)
+        else
+            warn("[oiTube Hub] Erro ao executar script: " .. tostring(runErr))
+        end
+    else
+        warn("[oiTube Hub] Erro ao baixar o script do GitHub.")
+    end
+end
+
+-- Ação do Botão Skip
+SkipButton.MouseButton1Click:Connect(function()
+    LoadMainScript()
+end)
+
+-- Quando a barra terminar sozinha aos 3 segundos
+tweenBar.Completed:Connect(function()
+    LoadMainScript()
+end)
